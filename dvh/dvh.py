@@ -13,9 +13,6 @@ def monotonic_decreasing(list_):
     return np.all(np.diff(list_) <= 0)
 
 
-#TODO: implement some sort of interpolation scheme rather than just
-#TODO: using bin mid points
-
 class DVH(object):
 
     def __init__(self, bins, volumes):
@@ -68,13 +65,16 @@ class DVH(object):
             )
 
     def _calculate_stats(self):
-        self.mean_dose = (self.bin_mids*self.diff_volumes).sum()
+        self.mean_dose = (self.bin_mids * self.diff_volumes).sum()
         nonzero = np.where(self.diff_volumes > 0)[0]
         self.min_dose = self.bin_mids[nonzero[0]]
         self.max_dose = self.bin_mids[nonzero[-1]]
 
     def dose_to_volume_fraction(self, volume_fraction):
-        """return the dose that receives at least volume_fraction % dose"""
+        """Return the dose that receives at least volume_fraction % dose (e.g.
+        dvh.dose_to_volume_fraction(0.9) == D90% ).
+        Doses are linearly interpreted between two enclosing bin centres.
+        """
 
         if volume_fraction < 0. or volume_fraction > 1.:
             raise ValueError("%.3G is outside expected volume fraction range of 0 <= v <= 1" % (volume_fraction))
@@ -84,17 +84,30 @@ class DVH(object):
         elif volume_fraction == 1.:
             return self.min_dose
 
-        idx = np.where(self.cum_volumes>=volume_fraction)[0][-1]
-
-        return self.bin_mids[idx]
+        try:
+            lower_idx = np.where(self.cum_volumes >= volume_fraction)[0][-1] #
+            l, u = lower_idx, lower_idx+1
+            doses = self.bin_mids
+            volumes = self.cum_volumes
+            return doses[l] + (doses[u] - doses[l])*(volume_fraction - volumes[l]) / (volumes[u] - volumes[l])
+        except IndexError:
+            raise ValueError("DVH is truncated.  Unable to calculate dose to requested volume fraction")
 
     def volume_fraction_receiving_dose(self, dose):
-        """return the fraction of total volume recieving the input dose"""
+        """ Return the fraction of total volume recieving the input dose. (e.g.
+        dvh.volume_fraction_receiving_dose(50) == V50Gy ).
+
+        Volumes are linearly interpreted between two enclosing points.
+        """
 
         if dose > self.max_dose:
             return 0
         elif dose <= self.min_dose:
             return 1.
 
-        idx = numpy.where(self.bins<=dose)[0][-1]
-        return self.cum_volumes[idx]
+        lower_idx = numpy.where(self.bin_mids <= dose)[0][-1]
+        l, u = lower_idx, lower_idx + 1
+        doses = self.bin_mids
+        volumes = self.cum_volumes
+
+        return volumes[l]+(volumes[u]-volumes[l])*(dose-doses[l])/(doses[u]-doses[l])

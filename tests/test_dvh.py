@@ -86,8 +86,10 @@ class TestDvh(unittest.TestCase):
         self.assertAlmostEqual(dvh.dose_to_volume_fraction(1), self.min_dose)
 
     def test_dose_to_volume_fraction_mid(self):
+        """ A volume fraction of 0.9999999999 should give just slightly more than min dose"""
         dvh = DVH(self.test_doses, self.test_cum_vols)
-        self.assertAlmostEqual(dvh.dose_to_volume_fraction(0.5), self.mean_dose)
+        self.assertAlmostEqual(dvh.dose_to_volume_fraction(0.9999999999), self.min_dose, places=4)
+        self.assertGreater(dvh.dose_to_volume_fraction(0.9999999999), self.min_dose)
 
     def test_dose_to_volume_fraction_invalid(self):
         dvh = DVH(self.test_doses, self.test_cum_vols)
