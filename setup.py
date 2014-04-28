@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import dvh
 import os
 import sys
 
@@ -19,11 +20,11 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='dvh',
-    version='0.1.0',
+    version=dvh.__version__,
     description='Small package for manipulating dose volume histograms in Python',
     long_description=readme + '\n\n' + history,
-    author='Randle Taylor',
-    author_email='randle.taylor@gmail.com',
+    author=dvh.__author__,
+    author_email=dvh.__email__,
     url='https://github.com/randlet'
         '/dvh',
     packages=[
@@ -45,8 +46,6 @@ setup(
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
     ],
     test_suite='tests',
 )
