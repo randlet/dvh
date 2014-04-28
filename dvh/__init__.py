@@ -3,6 +3,6 @@
 
 __author__ = 'Randle Taylor'
 __email__ = 'randle.taylor@gmail.com'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 from dvh import DVH, monotonic_increasing, monotonic_decreasing
