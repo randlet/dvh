@@ -15,7 +15,7 @@ def monotonic_decreasing(list_):
 
 class DVH(object):
 
-    def __init__(self, bins, volumes):
+    def __init__(self, bins=None, volumes=None):
         """
         bins is a sequence of dose bin edges including the rightmost edge (same
         as numpy.histogram).
@@ -30,6 +30,10 @@ class DVH(object):
         would mean 50% of volume receives a dose between 10 and 20cGy
 
         """
+
+        if bins is None or volumes is None:
+            raise ValueError("You must pass both bins and volumes arrays")
+
 
         self.bins = np.array(bins, dtype=np.float)
         if self.bins[0] != 0:
