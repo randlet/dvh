@@ -37,7 +37,7 @@ class DVH(object):
 
         self.bins = np.array(bins, dtype=np.float)
         if self.bins[0] != 0:
-            np.insert(self.bins, 0, 0)
+            raise ValueError("First dose bin edge must be at 0 dose")
 
         self.bin_mids = self.bins[:-1] + np.diff(self.bins)/2.
 
@@ -55,6 +55,7 @@ class DVH(object):
         dvh_is_cumulative = monotonic_decreasing(self._volumes) and (self._volumes[0] == self._volumes.max())
 
         if dvh_is_cumulative:
+
             self.cum_volumes = self._volumes/self._volumes.max()
             self.diff_volumes = np.append(np.diff(self.cum_volumes[::-1])[::-1], self.cum_volumes[-1])
         else:
