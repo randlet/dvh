@@ -51,7 +51,6 @@ class DVH(object):
             self.doses = np.append(self.doses, self.doses[-1] + (self.doses[-1] - self.doses[-2]))
             self._volumes  = np.append(self._volumes, 0)
 
-
         self._set_volumes()
         self._calculate_stats()
 
