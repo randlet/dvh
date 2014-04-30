@@ -34,6 +34,7 @@ setup(
                  'dvh'},
     include_package_data=True,
     install_requires=[
+        'numpy',
     ],
     license="BSD",
     zip_safe=False,

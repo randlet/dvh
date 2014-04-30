@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import json
 import numpy as np
 
 def monotonic_increasing(list_):
@@ -19,11 +20,16 @@ def differential_to_cumulative(doses, volumes):
 
 class DVH(object):
 
+
     def __init__(self, doses=None, volumes=None):
         """
         doses, volumes are arrays of equal length representing points on a
         cumulative dose volume histogram curve.
         """
+
+        self.serializers = {
+            "json":self._json_serialize,
+        }
 
         if doses is None or volumes is None:
             raise ValueError("You must pass both doses and volumes arrays")
@@ -116,3 +122,39 @@ class DVH(object):
         ds, vs = self.doses, self.cum_volumes
 
         return vs[l]+(vs[u]-vs[l])*(dose-ds[l])/(ds[u]-ds[l])
+
+    def serialize(self, method="json", with_diff=True):
+
+        if method not in self.serializers:
+            msg = "method must be one of {0} not {1}".format(','.join(self.serializers.keys()), method)
+            raise TypeError(msg)
+
+        return self.serializers[method](self.to_dict(with_diff))
+
+    def to_dict(self, with_diff=True):
+        """Return dvh data in dictionary like :
+            {
+                "doses":[..],
+                "cum_volumes":[...],
+                "dif_volumes":[...], # only if with_diff is truthy
+                "min_dose": 123,
+                "max_dose": 789,
+                "mean_dose": 456,
+            }
+        """
+
+        d = {
+            "doses": self.doses.tolist(),
+            "cum_volumes": self.cum_volumes.tolist(),
+            "min_dose": self.min_dose,
+            "max_dose": self.max_dose,
+            "mean_dose": self.mean_dose,
+        }
+        if with_diff:
+            d["diff_volumes"] = self.diff_volumes.tolist()
+
+        return d
+
+    def _json_serialize(self, data):
+        return json.dumps(data)
+

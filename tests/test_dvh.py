@@ -8,6 +8,7 @@ test_dvh
 Tests for `dvh` module.
 """
 
+import json
 import unittest
 import numpy as np
 from dvh import DVH, monotonic_increasing, monotonic_decreasing
@@ -176,6 +177,64 @@ class TestDvh(unittest.TestCase):
         volumes = [10, 0, 0, 10]
         dvh = DVH(doses, volumes)
         self.assertAlmostEqual(dvh.volume_fraction_receiving_dose(dvh.mean_dose), 0.5)
+
+    def test_to_dict(self):
+        doses = [1, 2, 3, 4, 5]
+        volumes = [1, 1, 0.5, 0.5, 0]
+
+        dvh = DVH(doses, volumes)
+
+        expected = {
+            'diff_volumes': [0.0, 0.0, 0.5, 0.0, 0.5, 0.0],
+            'cum_volumes': [1.0, 1.0, 1.0, 0.5, 0.5, 0.0],
+            'doses': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+            'mean_dose': 3.0,
+            'max_dose': 4.0,
+            'min_dose': 2.0
+        }
+        self.assertDictEqual(expected, dvh.to_dict())
+
+    def test_to_dict_no_diff(self):
+        doses = [1, 2, 3, 4, 5]
+        volumes = [1, 1, 0.5, 0.5, 0]
+
+        dvh = DVH(doses, volumes)
+
+        expected = {
+            'cum_volumes': [1.0, 1.0, 1.0, 0.5, 0.5, 0.0],
+            'doses': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+            'mean_dose': 3.0,
+            'max_dose': 4.0,
+            'min_dose': 2.0
+        }
+        self.assertDictEqual(expected, dvh.to_dict(False))
+
+    def test_json_serialze(self):
+
+        doses = [1, 2, 3, 4, 5]
+        volumes = [1, 1, 0.5, 0.5, 0]
+
+        dvh = DVH(doses, volumes)
+
+        expected = {
+            'diff_volumes': [0.0, 0.0, 0.5, 0.0, 0.5, 0.0],
+            'cum_volumes': [1.0, 1.0, 1.0, 0.5, 0.5, 0.0],
+            'doses': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+            'mean_dose': 3.0,
+            'max_dose': 4.0,
+            'min_dose': 2.0
+        }
+        self.assertDictEqual(json.loads(json.dumps(expected)), json.loads(dvh.serialize()))
+
+    def test_json_serialze_invalid(self):
+
+        doses = [1, 2, 3, 4, 5]
+        volumes = [1, 1, 0.5, 0.5, 0]
+
+        dvh = DVH(doses, volumes)
+        with self.assertRaises(TypeError):
+            dvh.serialize(method="blah")
+
 
 if __name__ == '__main__':
     unittest.main()
