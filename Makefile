@@ -20,9 +20,9 @@ clean-build:
 	rm -fr *.egg-info
 
 clean-pyc:
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
+	find . -name '*.pyc' | xargs rm -f
+	find . -name '*.pyo' | xargs rm -f
+	find . -name '*~' | xargs rm -f
 
 lint:
 	flake8 dvh tests
@@ -37,7 +37,6 @@ coverage:
 	coverage run --source dvh setup.py test
 	coverage report -m
 	coverage html
-	open htmlcov/index.html
 
 docs:
 	rm -f docs/dvh.rst
