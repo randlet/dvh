@@ -9,7 +9,7 @@ Tests for `dvh` module.
 """
 
 import json
-import unittest
+import unittest2 as unittest
 import numpy as np
 from dvh import DVH, monotonic_increasing, monotonic_decreasing
 
