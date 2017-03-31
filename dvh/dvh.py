@@ -4,6 +4,7 @@
 import json
 import numpy as np
 
+
 def monotonic_increasing(list_):
     """Check if input list is monotonically increasing"""
     return np.all(np.diff(list_) >= 0)
@@ -13,13 +14,13 @@ def monotonic_decreasing(list_):
     """Check if input list is monotonically decreasing"""
     return np.all(np.diff(list_) <= 0)
 
+
 def differential_to_cumulative(doses, volumes):
-    cum =np.cumsum(volumes[::-1])[::-1]
+    cum = np.cumsum(volumes[::-1])[::-1]
     return cum
 
 
 class DVH(object):
-
 
     def __init__(self, doses=None, volumes=None):
         """
@@ -28,7 +29,7 @@ class DVH(object):
         """
 
         self.serializers = {
-            "json":self._json_serialize,
+            "json": self._json_serialize,
         }
 
         if doses is None or volumes is None:
@@ -43,7 +44,6 @@ class DVH(object):
         if len(volumes) != len(doses):
             raise ValueError("Mismatch between length of volumes and dose arrays")
 
-
         self.doses = np.array(doses, dtype=np.float)
         self._volumes = np.array(volumes, dtype=np.float)
 
@@ -55,11 +55,10 @@ class DVH(object):
         # force volumes to zero for last point
         if self._volumes[-1] != 0:
             self.doses = np.append(self.doses, self.doses[-1] + (self.doses[-1] - self.doses[-2]))
-            self._volumes  = np.append(self._volumes, 0)
+            self._volumes = np.append(self._volumes, 0)
 
         self._set_volumes()
         self._calculate_stats()
-
 
     def _set_volumes(self):
 
@@ -69,13 +68,12 @@ class DVH(object):
         # sanity check
         assert len(self.doses) == len(self.diff_volumes) and len(self.diff_volumes) == len(self.cum_volumes)
 
-
     def _calculate_stats(self):
         self.mean_dose = (self.doses * self.diff_volumes).sum()
         nonzero = np.where(self.diff_volumes > 0)[0]
 
         # special case to handle Monaco min dose = 0
-        if self.doses[1] == (self.doses[2] - self.doses[1])/2:
+        if self.doses[1] == (self.doses[2] - self.doses[1])//2:
             self.min_dose = 0.
         else:
             self.min_dose = self.doses[nonzero[0]]
@@ -97,11 +95,11 @@ class DVH(object):
             return self.min_dose
 
         try:
-            lower_idx = np.where(self.cum_volumes >= volume_fraction)[0][-1] #
+            lower_idx = np.where(self.cum_volumes >= volume_fraction)[0][-1]
             l, u = lower_idx, lower_idx+1
             ds, vs = self.doses, self.cum_volumes
             return ds[l] + (ds[u] - ds[l])*(volume_fraction - vs[l]) / (vs[u] - vs[l])
-        except IndexError: # pragma:nocover
+        except IndexError:  # pragma:nocover
             # should never hit this since we always stick have a zero volume point on end of dvh
             raise ValueError("DVH is truncated.  Unable to calculate dose to requested volume fraction")
 
@@ -157,4 +155,3 @@ class DVH(object):
 
     def _json_serialize(self, data):
         return json.dumps(data)
-
