@@ -22,11 +22,12 @@ def differential_to_cumulative(doses, volumes):
 
 class DVH(object):
 
-    def __init__(self, doses=None, volumes=None):
+    def __init__(self, doses=None, volumes=None, max_at_zero_vol=False):
         """
         doses, volumes are arrays of equal length representing points on a
         cumulative dose volume histogram curve.
         """
+        self.max_at_zero_vol = max_at_zero_vol
 
         self.serializers = {
             "json": self._json_serialize,
@@ -73,12 +74,15 @@ class DVH(object):
         nonzero = np.where(self.diff_volumes > 0)[0]
 
         # special case to handle Monaco min dose = 0
-        if self.doses[1] == (self.doses[2] - self.doses[1])//2:
+        if self.doses[1] == (self.doses[2] - self.doses[1]) // 2:
             self.min_dose = 0.
         else:
             self.min_dose = self.doses[nonzero[0]]
 
-        self.max_dose = self.doses[nonzero[-1]]
+        if self.max_at_zero_vol and len(self.doses) > nonzero[-1]:
+            self.max_dose = self.doses[nonzero[-1] + 1]
+        else:
+            self.max_dose = self.doses[nonzero[-1]]
 
     def dose_to_volume_fraction(self, volume_fraction):
         """Return the dose that receives at least volume_fraction % dose (e.g.
