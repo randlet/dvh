@@ -45,8 +45,8 @@ class DVH(object):
         if len(volumes) != len(doses):
             raise ValueError("Mismatch between length of volumes and dose arrays")
 
-        self.doses = np.array(doses, dtype=np.float)
-        self._volumes = np.array(volumes, dtype=np.float)
+        self.doses = np.array(doses, dtype=float)
+        self._volumes = np.array(volumes, dtype=float)
 
         # force dose to zero for first point
         if self.doses[0] != 0:
